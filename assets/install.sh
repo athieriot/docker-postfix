@@ -13,6 +13,9 @@ nodaemon=true
 [program:postfix]
 command=/opt/postfix.sh
 
+[program:imap]
+command=/opt/imap.sh
+
 [program:rsyslog]
 command=/usr/sbin/rsyslogd -n -c3
 EOF
@@ -28,6 +31,28 @@ EOF
 chmod +x /opt/postfix.sh
 postconf -e myhostname=$maildomain
 postconf -F '*/*/chroot = n'
+
+############
+#  Support for IMAP server
+############
+cat >> /opt/imap.sh <<EOF
+#!/bin/bash
+service courier-imap start
+service courier-authdaemon start
+tail -f /var/log/mail.log
+EOF
+chmod +x /opt/imap.sh
+
+echo $smtp_user | tr , \\n > /tmp/passwd
+while IFS=':' read -r _user _pwd; do
+  useradd -ms /bin/bash $_user
+  echo "$_user:$_pwd" | chpasswd
+done < /tmp/passwd
+
+postconf -e "home_mailbox = Maildir/"
+postconf -e "mydestination = $maildomain, localhost.localdomain, localhost"
+postconf -e "inet_interfaces = all"
+postconf -e "recipient_delimiter = +"
 
 ############
 # SASL SUPPORT FOR CLIENTS
