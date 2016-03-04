@@ -40,6 +40,14 @@ TLS and OpenDKIM support are optional.
 			--name postfix -d catatnight/postfix
 	```
 
+4. User Imap server for Gitlab Reply By Email
+
+	```bash
+	$ sudo docker run -p 25:25 -p 143:143 \
+			-e maildomain=mail.example.com -e smtp_user=user:pwd \
+			--name postfix -d catatnight/postfix
+	```
+
 ## Note
 + Login credential should be set to (`username@mail.example.com`, `password`) in Smtp Client
 + You can assign the port of MTA on the host machine to one other than 25 ([postfix how-to](http://www.postfix.org/MULTI_INSTANCE_README.html))
